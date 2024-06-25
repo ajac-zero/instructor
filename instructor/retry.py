@@ -80,7 +80,7 @@ def reask_messages(response: ChatCompletion, mode: Mode, exception: Exception):
     if mode == Mode.COHERE_TOOLS:
         yield {
             "role": "user",
-            "content": f"Validation Error found:\n{exception}\nRecall the function correctly, fix the errors",
+            "message": f"Validation Error found:\n{exception}\nRecall the function correctly, fix the errors",
         }
         return
     if mode == Mode.GEMINI_JSON:
@@ -181,6 +181,8 @@ def retry_sync(
                         Mode.VERTEXAI_JSON,
                     }:
                         kwargs["contents"].extend(reask_messages(response, mode, e))
+                    elif mode in {Mode.COHERE_TOOLS}:
+                        kwargs["chat_history"].extend(reask_messages(response, mode, e))
                     else:
                         kwargs["messages"].extend(reask_messages(response, mode, e))
                     if mode in {Mode.ANTHROPIC_TOOLS, Mode.ANTHROPIC_JSON}:
